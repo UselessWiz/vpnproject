@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-
-import sys
-import subprocess
-import time
-import csv
-import re
-import os
+import sys, subprocess, time, csv, re, os
 
 # VPN configuration
 VERSION = sys.argv[1]
@@ -13,7 +6,7 @@ VPN_TARGET_IP = "192.168.60.7"
 VPN_CLIENT_CONTAINER = "client-10.9.0.5"
 VPN_SERVER_CONTAINER = "server-router"
 PRIVATE_HOST_CONTAINER = "host-192.168.60.7"
-LOG_FILE = f"benchmark/{VERSION}_vpn_benchmark_results.csv"
+LOG_FILE = f"benchmark/results/{VERSION}_vpn_benchmark_results.csv"
 
 
 def run_cmd(cmd, capture_output=False):

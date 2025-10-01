@@ -11,7 +11,7 @@ This VPN is deployed in preconfigured Docker containers running Linux across two
 
 ### Running the VPN
 ```shell
-version="RSA" # Select version, use "RSA", "QUIC", or "X25519"
+version="RSA" # Select version, use "RSA", "QUIC", "X25519" or "ML-KEM"
 
 docker-compose build
 docker-compose up -d
@@ -23,12 +23,16 @@ openssl rsa -in keys/RSA/server_private.pem -outform PEM -pubout -out keys/serve
 openssl genrsa -out keys/RSA/client_private.pem 2048
 openssl rsa -in keys/RSA/client_private.pem -outform PEM -pubout -out keys/client_public.pem
 
-# For X25519
+# Generate keys for X25519 version
 mkdir keys
 openssl genpkey -algorithm X25519 -out keys/X25519/x-server_private.pem
 openssl pkey -in keys/x-server_private.pem -pubout -out keys/X25519/x-server_public.pem
 openssl genpkey -algorithm X25519 -out keys/X25519/x-client_private.pem
 openssl pkey -in keys/x-client_private.pem -pubout -out keys/X25519/x-client_public.pem
+
+# Generate keys for ML-KEM version
+mkdir keys
+python3 tools/keygen.py
 
 # Validate no connectivity between client and internal host
 docker exec -it client-10.9.0.5 ping 192.168.60.7
@@ -40,45 +44,9 @@ docker exec -it server-router env PYTHONPATH=/volumes python3 /volumes/server/${
 # Validate the connectivity between client and internal host
 docker exec -it client-10.9.0.5  ping 192.168.60.7
 ```
-Benchmarking needs to be run from the src directory, and should be run on the host machine (not within the containers).
+Benchmarking needs to be run from the src directory, and should be run on the host machine (not within the containers). It is recommended to create a virtual environment on the machine and run benchmarking using that.
 
-To quickly perform benchmarking, run the `benchmark.sh` script. 
-
-```shell
-docker-compose build
-docker-compose up -d
-
-versions=("RSA" "QUIC" "X25519")
-
-# To run benchmarking (bash terminals or similar)
-for version in "${versions[@]}";
-do
-    docker exec -itd client-10.9.0.5 env PYTHONPATH=/volumes python3 /volumes/client/${version}_client.py
-    docker exec -itd server-router env PYTHONPATH=/volumes python3 /volumes/server/${version}_server.py
-    python3 benchmark/run_tests.py ${version} > /dev/null
-done
-
-docker-compose kill
-docker-compose down
-```
-
-```PowerShell
-# To run benchmarking (PowerShell)
-$dirs = gci -Directory
-foreach ($dir in $dirs) {
-    pushd
-    cd $dir.FullName
-    docker-compose build
-    docker-compose up -d
-    $dirName=$dir.Name
-    docker exec -itd "${dirName}-client-10.9.0.5" env PYTHONPATH=/volumes python3 /volumes/client/client.py
-    docker exec -itd "${dirName}-server-router" env PYTHONPATH=/volumes python3 /volumes/server/server.py
-    python3 benchmark/run_tests.py | Out-File -Append ./benchmark-output.txt
-    docker-compose kill
-    docker-compose down
-    popd
-}
-```
+To perform benchmarking, run the `benchmark.sh` or `benchmark.ps1` scripts. 
 
 ### Creating a local Wireguard connection for comparison testing
 Assumptions:

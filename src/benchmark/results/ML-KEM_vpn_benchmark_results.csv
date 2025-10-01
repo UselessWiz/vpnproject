@@ -1,0 +1,78 @@
+test_type,metric,value
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+26588  47588 17.0  0.3 python3 /volumes/server/ML-KEM_server.py"
+ping,min,
+ping,avg,
+ping,max,
+ping,mdev,
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+84600 105868  0.4  1.0 python3 /volumes/server/ML-KEM_server.py"
+iperf3-tcp,throughput_mbps,
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+85020 105868 34.0  1.0 python3 /volumes/server/ML-KEM_server.py"
+ping,min,
+ping,avg,
+ping,max,
+ping,mdev,
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+85080 105868 14.8  1.0 python3 /volumes/server/ML-KEM_server.py"
+ping,min,4.474
+ping,avg,5.892
+ping,max,7.638
+ping,mdev,1.068
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+85208 106124 29.7  1.0 python3 /volumes/server/ML-KEM_server.py"
+iperf3-tcp,throughput_mbps,"('9.59 Mbits', '9.01 Mbits')"
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+85208 106124 29.0  1.0 python3 /volumes/server/ML-KEM_server.py"
+iperf3-udp,raw_output,"Connecting to host 192.168.60.7, port 5201
+[  5] local 192.168.53.99 port 60401 connected to 192.168.60.7 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  5]   0.00-1.00   sec  59.6 MBytes   500 Mbits/sec  43137  
+[  5]   1.00-2.00   sec  59.6 MBytes   500 Mbits/sec  43161  
+[  5]   2.00-3.00   sec  59.6 MBytes   500 Mbits/sec  43170  
+[  5]   3.00-4.00   sec  59.6 MBytes   500 Mbits/sec  43157  
+[  5]   4.00-5.00   sec  59.6 MBytes   500 Mbits/sec  43156  
+[  5]   5.00-6.00   sec  59.6 MBytes   500 Mbits/sec  43187  
+[  5]   6.00-7.00   sec  59.6 MBytes   500 Mbits/sec  43145  
+[  5]   7.00-8.00   sec  59.6 MBytes   500 Mbits/sec  43150  
+[  5]   8.00-9.00   sec  59.7 MBytes   501 Mbits/sec  43203  
+[  5]   9.00-10.00  sec  59.6 MBytes   500 Mbits/sec  43152  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.00  sec   596 MBytes   500 Mbits/sec  0.000 ms  0/431618 (0%)  sender
+[  5]   0.00-10.44  sec  15.1 MBytes  12.1 Mbits/sec  1.094 ms  420395/431315 (97%)  receiver
+
+iperf Done."
+concurrent,throughput_mbps,"('8.83 Mbits', '7.72 Mbits')"
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+72788  92920 14.2  0.9 python3 /volumes/server/ML-KEM_server.py"
+ping,min,4.946
+ping,avg,5.951
+ping,max,7.007
+ping,mdev,0.884
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+73172  93052 28.4  0.9 python3 /volumes/server/ML-KEM_server.py"
+iperf3-tcp,throughput_mbps,"('9.92 Mbits', '9.25 Mbits')"
+resource,cpu_mem_info,"RSS    VSZ %CPU %MEM CMD
+73300  93572 28.2  0.9 python3 /volumes/server/ML-KEM_server.py"
+iperf3-udp,raw_output,"Connecting to host 192.168.60.7, port 5201
+[  5] local 192.168.53.99 port 43542 connected to 192.168.60.7 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  5]   0.00-1.00   sec  59.6 MBytes   500 Mbits/sec  43136  
+[  5]   1.00-2.00   sec  59.6 MBytes   500 Mbits/sec  43161  
+[  5]   2.00-3.00   sec  59.6 MBytes   500 Mbits/sec  43160  
+[  5]   3.00-4.00   sec  59.6 MBytes   500 Mbits/sec  43166  
+[  5]   4.00-5.00   sec  59.6 MBytes   500 Mbits/sec  43181  
+[  5]   5.00-6.00   sec  59.6 MBytes   500 Mbits/sec  43149  
+[  5]   6.00-7.00   sec  59.6 MBytes   500 Mbits/sec  43188  
+[  5]   7.00-8.00   sec  59.6 MBytes   500 Mbits/sec  43134  
+[  5]   8.00-9.00   sec  59.6 MBytes   500 Mbits/sec  43174  
+[  5]   9.00-10.00  sec  59.6 MBytes   500 Mbits/sec  43155  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-10.00  sec   596 MBytes   500 Mbits/sec  0.000 ms  0/431604 (0%)  sender
+[  5]   0.00-10.48  sec  16.1 MBytes  12.9 Mbits/sec  1.494 ms  419431/431070 (97%)  receiver
+
+iperf Done."
+concurrent,throughput_mbps,"('8.34 Mbits', '7.21 Mbits')"

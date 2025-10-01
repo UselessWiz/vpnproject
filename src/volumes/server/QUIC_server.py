@@ -7,7 +7,7 @@ from scapy.all import *
 from aioquic.asyncio import serve
 from aioquic.quic.configuration import QuicConfiguration
 from shared.create_tun import create_tun
-from generate_cert import generate_self_signed_cert
+from tools.generate_cert import generate_self_signed_cert
 
 # Logging setup
 logging.basicConfig(
@@ -21,7 +21,7 @@ TUNSETIFF = 0x400454ca
 IFF_TUN   = 0x0001
 IFF_NO_PI = 0x1000
 TUN_IP = "192.168.53.98"
-SERVER_IP = "0.0.0.0" # "10.9.0.11"
+SERVER_IP = "10.9.0.11"
 QUIC_PORT = 4433
 
 ifname, tun = create_tun(TUNSETIFF, IFF_TUN, IFF_NO_PI)
