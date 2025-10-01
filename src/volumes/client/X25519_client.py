@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import os, socket, select
+import logging, os, socket, select
 from scapy.all import *
 from shared.create_tun import create_tun
-from shared.crypto.encrypt import encrypt
-from shared.crypto.decrypt import decrypt
+from shared.crypto.encrypt import aes_x25519_encrypt
+from shared.crypto.decrypt import aes_x25519_decrypt
 from shared.crypto.tools import load_public_key
 from shared.crypto.tools import load_private_key
 
@@ -39,7 +39,7 @@ while True:
     for fd in ready:
         if fd is sock:
             data, (ip, port) = sock.recvfrom(2048)
-            decrypted_data = decrypt(data, client_private_key, server_public_key)
+            decrypted_data = aes_x25519_decrypt(data, client_private_key, server_public_key)
             pkt = IP(decrypted_data)
             logger.info("From socket <==: {} --> {}".format(pkt.src, pkt.dst))
             os.write(tun, decrypted_data)
@@ -48,5 +48,5 @@ while True:
             packet = os.read(tun, 2048)
             pkt = IP(packet)
             logger.info("From tun ==>: {} --> {}".format(pkt.src, pkt.dst))
-            encrypted_data = encrypt(packet, client_private_key, server_public_key)
+            encrypted_data = aes_x25519_encrypt(packet, client_private_key, server_public_key)
             sock.sendto(encrypted_data, ("10.9.0.11", 9090))

@@ -5,7 +5,7 @@ docker compose build
 docker compose up -d
 
 # Benhcmark each version individually
-versions=("RSA" "QUIC" "X25519")
+versions=("RSA" "QUIC" "X25519" "ML-KEM")
 
 # To run benchmarking (bash terminals or similar)
 for version in "${versions[@]}";

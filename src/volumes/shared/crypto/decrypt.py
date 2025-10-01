@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from shared.crypto.tools import derive_shared_key, NONCE_SIZE
+from shared.crypto.tools import x25519_derive_shared_key, NONCE_SIZE
 import os
 
 # ----------------
@@ -13,7 +13,7 @@ import os
 MAX_RSA_PLAINTEXT = 190 # 190 byte limit for RSA OEAP https://crypto.stackexchange.com/a/42100
 RSA_CIPHERTEXT_LEN = 256
 
-def split_into_blocks_decrypt(data, private_key):
+def rsa_decrypt(data, private_key):
     decrypted = b''
 
     for i in range(0, len(data), RSA_CIPHERTEXT_LEN):
@@ -40,8 +40,8 @@ def split_into_blocks_decrypt(data, private_key):
 # ----------------
 
 # AES-256-GCM
-def decrypt(ciphertext, private_key, peer_public_key):
-    key = derive_shared_key(private_key, peer_public_key)
+def aes_x25519_decrypt(ciphertext, private_key, peer_public_key):
+    key = x25519_derive_shared_key(private_key, peer_public_key)
     nonce = ciphertext[:NONCE_SIZE]
     tag = ciphertext[NONCE_SIZE:NONCE_SIZE+16]
     ct = ciphertext[NONCE_SIZE+16:]
@@ -51,3 +51,14 @@ def decrypt(ciphertext, private_key, peer_public_key):
         backend=default_backend()
     ).decryptor()
     return decryptor.update(ct) + decryptor.finalize()
+
+def aes_mlkem_decrypt(ciphertext: bytes, key: bytes) -> bytes:
+    nonce = ciphertext[:NONCE_SIZE]
+    tag = ciphertext[NONCE_SIZE:NONCE_SIZE+16]
+    ct = ciphertext[NONCE_SIZE+16:]
+    decryptor = Cipher(
+        algorithms.AES(key),
+        modes.GCM(nonce),
+        backend=default_backend()
+    ).decryptor()
+    return decryptor.update(ct) + decryptor.finalize_with_tag(tag)
