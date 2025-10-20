@@ -12,7 +12,7 @@ server_addr = ("10.9.0.11", 9090)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.FileHandler("/volumes/client.log"), logging.StreamHandler(sys.stdout)]
+    handlers=[logging.FileHandler("/volumes/client.log")] #, logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
@@ -27,13 +27,13 @@ os.system("ip addr add 192.168.53.99/24 dev {}".format(ifname))
 os.system("ip link set dev {} up".format(ifname))
 os.system("ip route add 192.168.60.0/24 dev {}".format(ifname))
 
-client_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-client-private.pem")
+client_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-client_private.pem")
 
 # Create client and generate keys
 client = oqs.KeyEncapsulation(ALGORITHM, client_private_key)
 
 # Get server's public key
-server_public_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server-public.pem")
+server_public_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server_public.pem")
 
 # Encapsulate shared secret
 encapsulated_key, client_shared_secret = client.encap_secret(server_public_key) # encapsulated_key needs to be transmitted.
@@ -51,13 +51,14 @@ def send_hello(sock: socket):
     global hello_timer, encapsulated_key, server_addr
     logger.info(f"SERVER HELLO window timeout, resending CLIENT HELLO to {server_addr}")
     sock.sendto(b"CLIENT HELLO" + encapsulated_key, server_addr)
-    hello_timer = threading.Timer(5, send_hello, args={sock})
+    hello_timer = threading.Timer(5, send_hello, args=[sock])
     hello_timer.start()
 
 # Send intiial CLIENT HELLO
 logger.info(f"Sending CLIENT HELLO to {server_addr}.")
 sock.sendto(b"CLIENT HELLO" + encapsulated_key, server_addr)
-hello_timer = threading.Timer(5, send_hello, args=[sock]).start()
+hello_timer = threading.Timer(5, send_hello, args=[sock])
+hello_timer.start()
 
 while server_connected is False:
     data, (ip, port) = sock.recvfrom(2048)

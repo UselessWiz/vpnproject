@@ -13,7 +13,25 @@ import os
 MAX_RSA_PLAINTEXT = 190 # 190 byte limit for RSA OEAP https://crypto.stackexchange.com/a/42100
 RSA_CIPHERTEXT_LEN = 256
 
-def rsa_decrypt(data, private_key):
+def rsa_decrypt(data: bytes, private_key) -> bytes: #RSAPrivateKey
+    """Decrypts a piece of RSA encrypted ciphertext.
+     
+    This is done by first splitting it into blocks, then decrypting each block with 
+    the provided RSA private key.
+
+    Parameters
+    ----------
+    data : bytes
+        The ciphertext to decrypt.
+    private_key : RSAPrivateKey
+        The RSA private key to decrypt this ciphertext with.
+
+    Returns
+    -------
+    bytes
+        The plaintext that matches the provided data (ciphertext)
+    
+    """
     decrypted = b''
 
     for i in range(0, len(data), RSA_CIPHERTEXT_LEN):

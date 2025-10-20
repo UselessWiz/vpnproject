@@ -11,7 +11,7 @@ ALGORITHM = "ML-KEM-1024"
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[logging.FileHandler("/volumes/server.log"), logging.StreamHandler(sys.stdout)]
+    handlers=[logging.FileHandler("/volumes/server.log")] #, logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ os.system("ip link set dev {} up".format(ifname))
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(('10.9.0.11', 9090))
 
-server_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server-private.pem")
+server_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server_private.pem")
 
 server = oqs.KeyEncapsulation(ALGORITHM, server_private_key)
 
