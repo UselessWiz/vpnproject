@@ -1,4 +1,4 @@
-import os, oqs, socket, logging, select
+import sys, os, oqs, socket, logging, select, threading
 from scapy.all import *
 from shared.create_tun import create_tun
 from shared.crypto.encrypt import *
@@ -9,9 +9,9 @@ ALGORITHM = "ML-KEM-1024"
 
 #Logging setup
 logging.basicConfig(
-    filename='/volumes/server.log',
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s'
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler("/volumes/server.log")] #, logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ os.system("ip link set dev {} up".format(ifname))
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(('10.9.0.11', 9090))
 
-server_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server-private.pem")
+server_private_key = import_mlkem_pem("/keys/ML-KEM/mlkem-server_private.pem")
 
 server = oqs.KeyEncapsulation(ALGORITHM, server_private_key)
 
@@ -41,6 +41,13 @@ sym_key = None
 client_addr = None
 client_connected = False
 i = 0
+
+def confirmation_timeout():
+    global sym_key, client_addr, client_connected
+    if client_connected is False:
+        logger.info("SHARED SECRET CONFIRMATION window timeout. Connection not formed. Waiting for CLIENT HELLO")
+        sym_key = None
+        client_addr = None
 
 # Handle the initial connection.
 while client_connected is False:
@@ -53,10 +60,13 @@ while client_connected is False:
             sym_key = derive_shared_key(shared_secret)
             client_addr = (ip, port)
             sock.sendto(b"SERVER HELLO" + aes_mlkem_encrypt(b"SHARED SECRET CONFIRMATION", sym_key), client_addr)
+            # Start a timer to detect a timeout between client hello and secret confirmation.
+            threading.Timer(10, confirmation_timeout)
             continue
 
         # if not, must be a client ack packet.
         if sym_key is not None and aes_mlkem_decrypt(data, sym_key) == b"SHARED SECRET CONFIRMED" and (ip, port) == client_addr:
+            logger.info(f"Connection formed with {client_addr}")
             client_connected = True
 
 while True:    
