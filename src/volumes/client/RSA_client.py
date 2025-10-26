@@ -36,8 +36,6 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_public_key = load_public_key("/keys/RSA/server_public.pem")
 client_private_key = load_private_key("/keys/RSA/client_private.pem")
 
-print("Setup complete running client")
-
 while True:
     # this will block until at least one interface is ready
     ready, _, _ = select.select([sock, tun], [], []) # select.select rlist waits until the given file descriptors are ready for reading.

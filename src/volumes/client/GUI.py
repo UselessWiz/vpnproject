@@ -10,7 +10,7 @@ import math
 # --- Configuration Constants for VM Environment ---
 # Assuming the 'volumes' shared folder is auto-mounted here in the Linux VM
 VPN_SCRIPT_BASE_PATH = "/volumes" 
-# The internal host IP address for ping/iperf testing (as per project context)
+# The server's IP address for server connectivity testing
 VPN_SERVER_IP = "10.9.0.11" 
 # Timeout for analytics commands
 ANALYTICS_TIMEOUT = 10
@@ -132,7 +132,6 @@ class VPNGUI:
         self.log_text = tk.Text(parent, height=5, state="disabled", bg=self.COLOR_BG, relief="solid", borderwidth=1, font=("Courier New", 9))
         self.log_text.pack(fill=tk.BOTH, expand=True)
 
-    # --- GRAPH LOGIC (Kept for wave effect, no further modification needed here) ---
     def draw_graph_wave(self):
         """Draws a sine wave on the canvas, simulating network activity."""
         self.latency_canvas.delete("wave_line")
@@ -147,14 +146,12 @@ class VPNGUI:
         
         points = []
         for x in range(0, width + 1, 10):
-            # --- MODIFICATION: Use state variable for speed ---
             y = center_y + amplitude * math.sin(x * frequency + t * self.wave_speed_multiplier)
             points.extend([x, y])
             
         self.latency_canvas.create_line(points, fill=self.wave_color, width=2, tags="wave_line")
 
         self.wave_update_id = self.root.after(100, self.draw_graph_wave)
-    # --- END GRAPH LOGIC ---
 
     def update_visual_state(self, connected):
         if connected:
@@ -184,14 +181,13 @@ class VPNGUI:
         self.wave_refresh_ms = 100
         self.draw_graph_wave()
 
-    # --- MODIFIED: Changed all subprocess calls from 'docker exec' to 'sudo' commands ---
     def fetch_and_update_analytics(self):
         # Fetch Latency (using ping)
         try:
             # Command to run ping with sudo in the Linux VM
             ping_cmd = ["sudo", "ping", "-c", "1", VPN_SERVER_IP]
             result = subprocess.run(ping_cmd, capture_output=True, text=True, timeout=5)
-            if result.returncode == 0:
+            if result.returncode == 0 and self.status_var.get() == "Connected":
                 match = re.search(r"time=([\d\.]+)\s*ms", result.stdout)
                 if match:
                     self.latency_var.set(f"{float(match.group(1)):.1f} ms")
@@ -203,7 +199,7 @@ class VPNGUI:
             # Command to run iperf3 with sudo in the Linux VM
             dl_cmd = ["iperf3", "-c", VPN_SERVER_IP, "-R", "-t", "4", "-f", "m"]
             result = subprocess.run(dl_cmd, capture_output=True, text=True, timeout=ANALYTICS_TIMEOUT)
-            if result.returncode == 0:
+            if result.returncode == 0 and self.status_var.get() == "Connected":
                 match = re.search(r"(\d+\.?\d*)\s+Mbits/sec\s+.*receiver", result.stdout)
                 if match:
                     self.download_var.set(f"{float(match.group(1)):.2f} Mbps")
@@ -215,7 +211,7 @@ class VPNGUI:
             # Command to run iperf3 with sudo in the Linux VM
             ul_cmd = ["iperf3", "-c", VPN_SERVER_IP, "-t", "4", "-f", "m"]
             result = subprocess.run(ul_cmd, capture_output=True, text=True, timeout=ANALYTICS_TIMEOUT)
-            if result.returncode == 0:
+            if result.returncode == 0 and self.status_var.get() == "Connected":
                 match = re.search(r"(\d+\.?\d*)\s+Mbits/sec\s+.*sender", result.stdout)
                 if match:
                     self.upload_var.set(f"{float(match.group(1)):.2f} Mbps")
@@ -233,7 +229,6 @@ class VPNGUI:
         self.log_text.see(tk.END)
         self.log_text.config(state="disabled")
 
-    # --- MODIFIED: Changed subprocess call from 'docker exec' to 'ping' ---
     def check_connectivity(self):
         try:
             # Command to check connectivity using ping in the Linux VM
@@ -273,8 +268,7 @@ class VPNGUI:
         if not os.path.isdir(key_dir):
             messagebox.showerror("Error", "Invalid key directory")
             return
-        
-        # --- MODIFIED: Key file logic to include ML-KEM ---
+
         if version == "RSA":
             key_file_name = "client_private.pem"
         elif version == "ML-KEM":
@@ -282,7 +276,7 @@ class VPNGUI:
             key_file_name = "mlkem-client_private.pem" 
         elif version == "X25519": # Covers X25519
             key_file_name = "x-client_private.pem"
-            # QUIC keys are generated as needed, nothing else required.
+            # QUIC keys are handled internally by the aioquic library, nothing else required.
             
         if version != "QUIC":
             key_path = os.path.join(key_dir, version, key_file_name)
@@ -294,7 +288,6 @@ class VPNGUI:
                      messagebox.showerror("Error", f"Missing key file at both {key_path} and {key_path_alt}")
                      return
                 key_path = key_path_alt
-        # --- END MODIFIED KEY LOGIC ---
         
         self.is_vpn_on = True
         self.status_var.set("Connecting...")
@@ -305,7 +298,6 @@ class VPNGUI:
         #self.placeholder_wave_running = False
 
         try:
-            # --- MODIFIED: Switched from 'docker exec' to direct 'sudo' command in the Linux VM ---
             client_cmd = ["sudo", 
                           "env", 
                           f"PYTHONPATH={VPN_SCRIPT_BASE_PATH}", # Sets PYTHONPATH to the volumes share
@@ -331,7 +323,6 @@ class VPNGUI:
         self.is_vpn_on = False
         
         try:
-            # --- MODIFIED: Switched from 'docker exec' to 'sudo pkill' in the Linux VM ---
             # Kills the Python client script running in the background
             kill_cmd = ["sudo", "pkill", "-f", "client.py"]
             subprocess.run(kill_cmd, timeout=5)
@@ -349,6 +340,8 @@ class VPNGUI:
             self.root.after_cancel(self.wave_update_id)
             
         self.root.destroy()
+
+# --- Entry Point & Main Loop handling for the VPN GUI ---
 
 if __name__ == "__main__":
     root = tk.Tk()

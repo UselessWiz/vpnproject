@@ -6,7 +6,19 @@ from cryptography.hazmat.backends import default_backend
 import datetime
 
 def generate_self_signed_cert():
-    # Generate private key (ECDSA for faster QUIC, or RSA if you want)
+    """
+    Generate a self-signed certificate for use with QUIC. 
+    
+    Starts by generating a private key (ECDSA for faster QUIC; RSA is optional). This private key is then used to sign a created certificate. The key and certificate are then both exported to files. This is a self-signed certificate, and should not be used for real applications (for test purposes only).
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     private_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
     # private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048, backend=default_backend())
 
