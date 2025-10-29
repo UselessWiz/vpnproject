@@ -42,8 +42,6 @@ sock.bind((IP_A, PORT)) # Binds this socket to the external network address (and
 server_private_key = load_private_key("/keys/RSA/server_private.pem")
 client_public_key = load_public_key("/keys/RSA/client_public.pem")
 
-print("Setup complete running server")
-
 while True:
     # this will block until at least one interface is ready
     ready, _, _ = select.select([sock, tun], [], []) # select.select rlist waits until the given file descriptors are ready for reading.

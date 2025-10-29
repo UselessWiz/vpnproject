@@ -59,13 +59,13 @@ while client_connected is False:
             shared_secret = server.decap_secret(data[12:])
             sym_key = derive_shared_key(shared_secret)
             client_addr = (ip, port)
-            sock.sendto(b"SERVER HELLO" + aes_mlkem_encrypt(b"SHARED SECRET CONFIRMATION", sym_key), client_addr)
+            sock.sendto(b"SERVER HELLO" + aes_encrypt(b"SHARED SECRET CONFIRMATION", sym_key), client_addr)
             # Start a timer to detect a timeout between client hello and secret confirmation.
             threading.Timer(10, confirmation_timeout)
             continue
 
         # if not, must be a client ack packet.
-        if sym_key is not None and aes_mlkem_decrypt(data, sym_key) == b"SHARED SECRET CONFIRMED" and (ip, port) == client_addr:
+        if sym_key is not None and aes_decrypt(data, sym_key) == b"SHARED SECRET CONFIRMED" and (ip, port) == client_addr:
             logger.info(f"Connection formed with {client_addr}")
             client_connected = True
 
@@ -75,7 +75,7 @@ while True:
     for fd in ready:
         if fd is sock:
             data, (ip, port) = sock.recvfrom(2048)
-            decrypted_data = aes_mlkem_decrypt(data, sym_key)
+            decrypted_data = aes_decrypt(data, sym_key)
             pkt = IP(decrypted_data)
             logger.info("From socket <==: {} --> {}".format(pkt.src, pkt.dst))
             os.write(tun, decrypted_data)
@@ -84,6 +84,6 @@ while True:
             packet = os.read(tun, 2048)
             pkt = IP(packet)
             logger.info("From tun ==>: {} --> {}".format(pkt.src, pkt.dst))
-            encrypted_data = aes_mlkem_encrypt(packet, sym_key)
+            encrypted_data = aes_encrypt(packet, sym_key)
             sock.sendto(encrypted_data, (ip, port))
 

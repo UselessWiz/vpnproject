@@ -1,8 +1,8 @@
 import sys, os, oqs, socket, logging, select, threading
 from scapy.all import *
 from shared.create_tun import create_tun
-from shared.crypto.encrypt import aes_mlkem_encrypt
-from shared.crypto.decrypt import aes_mlkem_decrypt
+from shared.crypto.encrypt import aes_encrypt
+from shared.crypto.decrypt import aes_decrypt
 from shared.crypto.tools import import_mlkem_pem, derive_shared_key
 
 ALGORITHM = "ML-KEM-1024"
@@ -64,10 +64,10 @@ while server_connected is False:
     data, (ip, port) = sock.recvfrom(2048)
     if len(data) > 0:
         if (ip, port) == server_addr and data[0:12] == b"SERVER HELLO" and \
-            aes_mlkem_decrypt(data[12:], sym_key) == b"SHARED SECRET CONFIRMATION":
+            aes_decrypt(data[12:], sym_key) == b"SHARED SECRET CONFIRMATION":
             logger.info("SERVER HELLO received, sending SHARED SECRET CONFIRMED")
             hello_timer.cancel()
-            sock.sendto(aes_mlkem_encrypt(b"SHARED SECRET CONFIRMED", sym_key), server_addr)
+            sock.sendto(aes_encrypt(b"SHARED SECRET CONFIRMED", sym_key), server_addr)
             server_connected = True
 
 while True:
@@ -75,7 +75,7 @@ while True:
     for fd in ready:
         if fd is sock:
             data, (ip, port) = sock.recvfrom(2048)
-            decrypted_data = aes_mlkem_decrypt(data, sym_key)
+            decrypted_data = aes_decrypt(data, sym_key)
             pkt = IP(decrypted_data)
             logger.info("From socket <==: {} --> {}".format(pkt.src, pkt.dst))
             os.write(tun, decrypted_data)
@@ -84,5 +84,5 @@ while True:
             packet = os.read(tun, 2048)
             pkt = IP(packet)
             logger.info("From tun ==>: {} --> {}".format(pkt.src, pkt.dst))
-            encrypted_data = aes_mlkem_encrypt(packet, sym_key)
+            encrypted_data = aes_encrypt(packet, sym_key)
             sock.sendto(encrypted_data, ("10.9.0.11", 9090))
