@@ -113,13 +113,13 @@ This project uses LibOQS (and more specifically the Python bindings the Open Qua
 Encryption works by encoding each byte of the plaintext (which is limited to 32 bytes or 256 bits in size) as the coefficients of a polynomial. Noise based on the recipient's public key is included as well, with the idea being that this noise can only be removed from the ciphertext using the recipient's private key. Keys are created by sampling points in the space of the lattice, and operations within the algorithm are conducted with polynomial vector operations. See the standard for further explanation of how the system works in it's entirety.
 
 ### GUI
-The GUI is built in Python, using TKinter. The GUI file does not have any VPN/Networking logic; when the VPN is enabled, the console-based client program is started as a subprocess of the GUI, and the GUI stops this subprocess when the VPN gets turned off.
+The GUI is built in Python, using TKinter. The GUI file does not have any VPN/Networking logic; when the VPN is enabled, the console-based client program is started as a subprocess of the GUI, and the GUI stops this subprocess when the VPN gets turned off. The GUI keeps track of state, ensuring that the VPN is active only when it needs to be. The GUI also integrates realtime performance analysis capabilities to ensure users are aware of how the connection to the server is performing.
 
 ### mTLS
-
+Mutual TLS (mTLS) is an authentication protocol that extends standard TLS by requiring both the client and server to present and verify digital certificates before a secure connection is established. This mutual verification ensures that each side is communicating with a trusted entity, eliminating the risk of unauthorized access. In addition to encrypting data, mTLS provides strong identity assurance and integrity validation. It is widely used in secure systems such as VPNs, APIs, and microservice networks to protect against impersonation and man-in-the-middle attacks.
 
 ### Benchmarking Results
-
+See details in the PyPy_vs_CPython_VPN_Guide.pdf. Generally speaking, PyPy offers performance improvements over standard CPython.
 ---
 
 ##### References  
