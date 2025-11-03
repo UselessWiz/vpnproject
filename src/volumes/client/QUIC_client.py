@@ -2,9 +2,9 @@
 import ssl, os
 
 # mTLS certificate paths
-CA_CERT     = os.getenv("CA_CERT", "/volumes/keys/tls/ca/ca.crt")
-CLIENT_CERT = os.getenv("CLIENT_CERT", "/volumes/keys/tls/client/client.crt")
-CLIENT_KEY  = os.getenv("CLIENT_KEY", "/volumes/keys/tls/client/client.key")
+CA_CERT     = os.getenv("CA_CERT", "/keys/tls/ca/ca.crt")
+CLIENT_CERT = os.getenv("CLIENT_CERT", "/keys/tls/client/client.crt")
+CLIENT_KEY  = os.getenv("CLIENT_KEY", "/keys/tls/client/client.key")
 
 import asyncio
 import struct

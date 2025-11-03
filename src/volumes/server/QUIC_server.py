@@ -9,12 +9,11 @@ from scapy.all import *
 from aioquic.asyncio import serve
 from aioquic.quic.configuration import QuicConfiguration
 from shared.create_tun import create_tun
-from tools.generate_cert import generate_self_signed_cert
 
 # mTLS paths via environment with sensible defaults
-CA_CERT_ENV     = os.getenv("CA_CERT", "/volumes/keys/tls/ca/ca.crt")
-SERVER_CERT_ENV = os.getenv("SERVER_CERT", "/volumes/keys/tls/server/server.crt")
-SERVER_KEY_ENV  = os.getenv("SERVER_KEY", "/volumes/keys/tls/server/server.key")
+CA_CERT_ENV     = os.getenv("CA_CERT", "/keys/tls/ca/ca.crt")
+SERVER_CERT_ENV = os.getenv("SERVER_CERT", "/keys/tls/server/server.crt")
+SERVER_KEY_ENV  = os.getenv("SERVER_KEY", "/keys/tls/server/server.key")
 
 # Logging setup
 logging.basicConfig(
@@ -188,8 +187,6 @@ async def vpn_server():
     -------
     None
     """
-    # Keep existing behavior: generate self-signed certs if nothing provided
-    generate_self_signed_cert()
 
     configuration = QuicConfiguration(
         is_client=False,
@@ -199,9 +196,8 @@ async def vpn_server():
     )
     configuration.idle_timeout = 30.0
 
-    # Prefer env-provided certs, else fall back to generated ones
-    certfile = SERVER_CERT_ENV if os.path.exists(SERVER_CERT_ENV) else "cert.pem"
-    keyfile  = SERVER_KEY_ENV  if os.path.exists(SERVER_KEY_ENV)  else "key.pem"
+    certfile = SERVER_CERT_ENV
+    keyfile  = SERVER_KEY_ENV
     configuration.load_cert_chain(certfile=certfile, keyfile=keyfile)
 
     # mTLS: require client certificate and trust the CA

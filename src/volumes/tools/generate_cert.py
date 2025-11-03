@@ -7,9 +7,11 @@ import datetime
 
 def generate_self_signed_cert():
     """
-    Generate a self-signed certificate for use with QUIC. 
+    [DEPRECATED] Generate a self-signed certificate for use with QUIC. 
     
     Starts by generating a private key (ECDSA for faster QUIC; RSA is optional). This private key is then used to sign a created certificate. The key and certificate are then both exported to files. This is a self-signed certificate, and should not be used for real applications (for test purposes only).
+
+    Future improvements may include changing this to setup keys for mTLS; hence why this script has been left in place despite not being used at present.
 
     Parameters
     ----------

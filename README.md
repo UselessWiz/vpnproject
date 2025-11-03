@@ -38,7 +38,20 @@ openssl pkey -in keys/x-client_private.pem -pubout -out keys/X25519/x-client_pub
 mkdir keys
 python3 tools/keygen.py
 
-# Note that key generation is not necessary before running the QUIC version due to differences in this version's structure.
+# Certificate generation for QUIC/mTLS supported version
+mkdir keys keys/tls keys/tls/ca keys/tls/client keys/tls/server
+cd keys/tls
+# Create a CA certificate.
+openssl genrsa -out ca/ca.key 2048
+openssl req -x509 -new -key ca/ca.key -sha256 -days 365 -subj "/CN=VPN-CA" -out ca/ca.crt
+# Create server and client certs signed by the CA
+openssl genrsa -out server/server.key 2048
+openssl req -new -key server/server.key -out server/server.csr -config ../../openssl-server.cnf
+openssl x509 -req -in server/server.csr -CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial -out server/server.crt -days 365 -sha256 -extfile ../../openssl-server.cnf -extensions req_ext
+
+openssl genrsa -out client/client.key 2048
+openssl req -new -key client/client.key -out client/client.csr -config ../../openssl-client.cnf
+openssl x509 -req -in client/client.csr -CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial -out client/client.crt -days 365 -sha256 -extfile ../../openssl-client.cnf -extensions req_ext
 
 # Validate no connectivity between client and internal host
 docker exec -it client-10.9.0.5 ping 192.168.60.7
@@ -51,7 +64,7 @@ docker exec -it server-router env PYTHONPATH=/volumes python3 /volumes/server/${
 env PYTHONPATH=/volumes python3 /volumes/client/GUI.py 
 
 # Validate the connectivity between client and internal host
-docker exec -it client-10.9.0.5  ping 192.168.60.7
+docker exec -it client-10.9.0.5 ping 192.168.60.7
 ```
 Benchmarking needs to be run from the src directory, and should be run on the host machine (not within the containers). It is recommended to create a virtual environment on the machine and run benchmarking using that.
 
@@ -61,7 +74,6 @@ To perform benchmarking, run the `benchmark.sh` (Linux/Bash) or `benchmark.ps1` 
 Assumptions:
 - Devices are on same local network
 - IP addresses are 192.168.55.50 and 192.168.55.51
-
 
 ```ini
 # Device 1
@@ -102,6 +114,12 @@ Encryption works by encoding each byte of the plaintext (which is limited to 32 
 
 ### GUI
 The GUI is built in Python, using TKinter. The GUI file does not have any VPN/Networking logic; when the VPN is enabled, the console-based client program is started as a subprocess of the GUI, and the GUI stops this subprocess when the VPN gets turned off.
+
+### mTLS
+
+
+### Benchmarking Results
+
 ---
 
 ##### References  
